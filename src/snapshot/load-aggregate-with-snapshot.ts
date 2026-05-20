@@ -31,25 +31,6 @@ export async function loadAggregateWithSnapshot<
 
 	const snapshot = snapshotResult.value;
 
-	if (snapshot) {
-		const loadResult = await store.load({ streamId });
-
-		if (!loadResult.ok) {
-			return loadResult;
-		}
-
-		const stream = loadResult.value;
-
-		if (stream.type === "empty") {
-			return { ok: false, error: { type: "AggregateNotFound" } };
-		}
-
-		const postSnapshotEvents = stream.events.slice(snapshot.version);
-
-		const state = fold(snapshot.state, aggregate.reduce, postSnapshotEvents);
-		return Ok({ state, lastVersion: stream.lastVersion });
-	}
-
 	const loadResult = await store.load({ streamId });
 
 	if (!loadResult.ok) {
@@ -62,6 +43,11 @@ export async function loadAggregateWithSnapshot<
 		return { ok: false, error: { type: "AggregateNotFound" } };
 	}
 
-	const state = fold(aggregate.initialState, aggregate.reduce, stream.events);
+	const startingState = snapshot ? snapshot.state : aggregate.initialState;
+	const events = snapshot
+		? stream.events.slice(snapshot.version)
+		: stream.events;
+
+	const state = fold(startingState, aggregate.reduce, events);
 	return Ok({ state, lastVersion: stream.lastVersion });
 }

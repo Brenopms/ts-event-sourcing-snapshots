@@ -208,7 +208,7 @@ if (result.ok) {
 
 ## 12. Dependencies
 
-- **Peer**: `@ts-event-sourcing/core` >= 0.0.2
+- **Peer**: `@ts-event-sourcing/core` >= 1.0.1
 - **Runtime**: None beyond core
 - **Dev**: `vitest`, `typescript`, `tsdown`, `@biomejs/biome` (same toolchain as core)
 

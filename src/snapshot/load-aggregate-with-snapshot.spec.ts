@@ -1,4 +1,4 @@
-import { Ok } from "@ts-event-sourcing/core";
+import { type EventStore, loadAggregate, Ok } from "@ts-event-sourcing/core";
 import { describe, expect, it, vi } from "vitest";
 import { loadAggregateWithSnapshot } from "./load-aggregate-with-snapshot";
 
@@ -187,5 +187,104 @@ describe("loadAggregateWithSnapshot", () => {
 		expect(result.ok).toBe(false);
 		if (result.ok) throw new Error();
 		expect(result.error.type).toBe("AggregateNotFound");
+	});
+
+	it("returns identical state and version as loadAggregate with a snapshot", async () => {
+		const events = [
+			{ type: "INC" },
+			{ type: "INC" },
+			{ type: "INC" },
+			{ type: "INC" },
+			{ type: "INC" },
+			{ type: "INC" },
+			{ type: "INC" },
+		];
+
+		const snapshotStore = {
+			create: vi.fn(),
+			replace: vi.fn(),
+			load: vi
+				.fn()
+				.mockResolvedValue(
+					Ok({ streamId: "stream-1", version: 5, state: { count: 5 } }),
+				),
+		};
+
+		// loadAggregate does not use snapshotStore
+		const aggregateResult = await loadAggregate({
+			store: {
+				load: vi
+					.fn()
+					.mockResolvedValue(Ok({ type: "loaded", events, lastVersion: 7 })),
+			} as unknown as EventStore<{
+				type: "INC";
+			}>,,
+			streamId: "stream-1",
+			aggregate,
+		});
+
+		const snapshotResult = await loadAggregateWithSnapshot({
+			store: {
+				load: vi
+					.fn()
+					.mockResolvedValue(Ok({ type: "loaded", events, lastVersion: 7 })),
+				append: vi.fn(),
+			},
+			aggregate,
+			streamId: "stream-1",
+			snapshotStore,
+		});
+
+		expect(aggregateResult.ok).toBe(true);
+		expect(snapshotResult.ok).toBe(true);
+		if (!aggregateResult.ok || !snapshotResult.ok) throw new Error();
+
+		expect(snapshotResult.value.state).toEqual(aggregateResult.value.state);
+		expect(snapshotResult.value.lastVersion).toBe(
+			aggregateResult.value.lastVersion,
+		);
+	});
+
+	it("returns identical state and version as loadAggregate without a snapshot", async () => {
+		const events = [{ type: "INC" }, { type: "INC" }, { type: "INC" }];
+
+		const snapshotStore = {
+			create: vi.fn(),
+			replace: vi.fn(),
+			load: vi.fn().mockResolvedValue(Ok(null)),
+		};
+
+		const aggregateResult = await loadAggregate({
+			store: {
+				load: vi
+					.fn()
+					.mockResolvedValue(Ok({ type: "loaded", events, lastVersion: 3 })),
+			} as unknown as EventStore<{
+				type: "INC";
+			}>,
+			streamId: "stream-1",
+			aggregate,
+		});
+
+		const snapshotResult = await loadAggregateWithSnapshot({
+			store: {
+				load: vi
+					.fn()
+					.mockResolvedValue(Ok({ type: "loaded", events, lastVersion: 3 })),
+				append: vi.fn(),
+			},
+			aggregate,
+			streamId: "stream-1",
+			snapshotStore,
+		});
+
+		expect(aggregateResult.ok).toBe(true);
+		expect(snapshotResult.ok).toBe(true);
+		if (!aggregateResult.ok || !snapshotResult.ok) throw new Error();
+
+		expect(snapshotResult.value.state).toEqual(aggregateResult.value.state);
+		expect(snapshotResult.value.lastVersion).toBe(
+			aggregateResult.value.lastVersion,
+		);
 	});
 });
