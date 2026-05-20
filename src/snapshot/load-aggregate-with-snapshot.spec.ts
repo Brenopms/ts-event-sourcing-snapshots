@@ -218,7 +218,7 @@ describe("loadAggregateWithSnapshot", () => {
 					.mockResolvedValue(Ok({ type: "loaded", events, lastVersion: 7 })),
 			} as unknown as EventStore<{
 				type: "INC";
-			}>,,
+			}>,
 			streamId: "stream-1",
 			aggregate,
 		});
