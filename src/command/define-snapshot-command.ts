@@ -12,6 +12,20 @@ import type {
 	SnapshotStore,
 } from "../snapshot-store/snapshot-store";
 
+export type DefinedSnapshotCommand<S, C, E extends AnyEvent, Err> = {
+	execute(input: {
+		store: EventStore<E>;
+		streamId: string;
+		command: C;
+		idempotencyKey: string;
+	}): Promise<
+		Result<
+			{ state: S; events: readonly E[]; lastVersion: number },
+			Err | CoreError | SnapshotError
+		>
+	>;
+};
+
 export function defineSnapshotCommand<
 	State,
 	Command,
@@ -21,28 +35,13 @@ export function defineSnapshotCommand<
 	aggregate: AggregateDefinition<State, Event>;
 	handler: CommandHandler<State, Command, Event, Error>;
 	snapshotStore: SnapshotStore<State>;
-}): {
-	execute(input: {
-		store: EventStore<Event>;
-		streamId: string;
-		command: Command;
-		idempotencyKey: string;
-	}): Promise<
-		Result<
-			{ state: State; events: readonly Event[]; lastVersion: number },
-			Error | CoreError | SnapshotError
-		>
-	>;
-} {
+}): DefinedSnapshotCommand<State, Command, Event, Error> {
 	const { aggregate, handler, snapshotStore } = params;
 
 	return {
-		execute(input: {
-			store: EventStore<Event>;
-			streamId: string;
-			command: Command;
-			idempotencyKey: string;
-		}): Promise<
+		execute(
+			input,
+		): Promise<
 			Result<
 				{ state: State; events: readonly Event[]; lastVersion: number },
 				Error | CoreError | SnapshotError

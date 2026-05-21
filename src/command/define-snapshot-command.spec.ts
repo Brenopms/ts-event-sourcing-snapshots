@@ -116,4 +116,65 @@ describe("defineSnapshotCommand", () => {
 		if (result.ok) throw new Error();
 		expect((result.error as { type: string }).type).toBe("StoreError");
 	});
+
+	it("propagates event store errors", async () => {
+		const snapshotStore = new InMemorySnapshotStore<{ count: number }>();
+
+		const store = {
+			load: vi
+				.fn()
+				.mockResolvedValue(Ok({ type: "loaded", events: [], lastVersion: 0 })),
+			append: vi.fn().mockResolvedValue({
+				ok: false,
+				error: { type: "StoreError", cause: "db down" },
+			}),
+		};
+
+		const command = defineSnapshotCommand({
+			aggregate,
+			handler,
+			snapshotStore,
+		});
+
+		const result = await command.execute({
+			store,
+			streamId: "stream-1",
+			command: {},
+			idempotencyKey: "cmd-1",
+		});
+
+		expect(result.ok).toBe(false);
+		if (result.ok) throw new Error();
+		expect((result as any).error.type).toBe("StoreError");
+	});
+
+	it("returns the events emitted by the handler", async () => {
+		const snapshotStore = new InMemorySnapshotStore<{ count: number }>();
+
+		const store = {
+			load: vi
+				.fn()
+				.mockResolvedValue(Ok({ type: "loaded", events: [], lastVersion: 0 })),
+			append: vi.fn().mockResolvedValue(Ok({ lastVersion: 1 })),
+		};
+
+		const incHandler = vi.fn().mockReturnValue(Ok([{ type: "INC" as const }]));
+
+		const command = defineSnapshotCommand({
+			aggregate,
+			handler: incHandler,
+			snapshotStore,
+		});
+
+		const result = await command.execute({
+			store,
+			streamId: "stream-1",
+			command: {},
+			idempotencyKey: "cmd-1",
+		});
+
+		expect(result.ok).toBe(true);
+		if (!result.ok) throw new Error();
+		expect(result.value.events).toEqual([{ type: "INC" }]);
+	});
 });
