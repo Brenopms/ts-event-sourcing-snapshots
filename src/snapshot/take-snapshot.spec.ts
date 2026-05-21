@@ -116,4 +116,51 @@ describe("takeSnapshot", () => {
 		if (result.ok) throw new Error();
 		expect(result.error.type).toBe("StoreError");
 	});
+
+	it("propagates errors from create", async () => {
+		const snapshotStore = {
+			create: vi.fn().mockResolvedValue({
+				ok: false,
+				error: { type: "SnapshotAlreadyExists" },
+			}),
+			replace: vi.fn(),
+			load: vi.fn().mockResolvedValue(Ok(null)),
+		};
+
+		const result = await takeSnapshot({
+			snapshotStore,
+			streamId: "stream-1",
+			snapshot: { state: { count: 42 }, version: 5 },
+		});
+
+		expect(result.ok).toBe(false);
+		if (result.ok) throw new Error();
+		expect(result.error.type).toBe("SnapshotAlreadyExists");
+	});
+
+	it("propagates errors from replace", async () => {
+		const existingSnapshot = {
+			streamId: "s1",
+			version: 3,
+			state: { count: 10 },
+		};
+		const snapshotStore = {
+			create: vi.fn(),
+			replace: vi.fn().mockResolvedValue({
+				ok: false,
+				error: { type: "StoreError", cause: "disk full" },
+			}),
+			load: vi.fn().mockResolvedValue(Ok(existingSnapshot)),
+		};
+
+		const result = await takeSnapshot({
+			snapshotStore,
+			streamId: "stream-1",
+			snapshot: { state: { count: 42 }, version: 5 },
+		});
+
+		expect(result.ok).toBe(false);
+		if (result.ok) throw new Error();
+		expect(result.error.type).toBe("StoreError");
+	});
 });
