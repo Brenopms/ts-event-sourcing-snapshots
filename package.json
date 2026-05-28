@@ -1,71 +1,71 @@
 {
-  "name": "@ts-event-sourcing/snapshots",
-  "version": "0.0.1",
-  "description": "Snapshot extension for @ts-event-sourcing/core — accelerates aggregate rebuilds for long-lived streams",
-  "license": "MIT",
-  "author": "Breno Magalhães",
-  "type": "module",
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist/"
-  ],
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.mts",
-        "default": "./dist/index.mjs"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
-    }
-  },
-  "sideEffects": false,
-  "scripts": {
-    "prepublishOnly": "npm run build",
-    "build": "tsdown",
-    "format": "biome format",
-    "format:fix": "biome format --write",
-    "lint": "biome check",
-    "lint:fix": "biome check --fix",
-    "test": "run-s build test:*",
-    "test:unit": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "watch:build": "tsc -p tsconfig.json -w",
-    "watch:test": "vitest",
-    "generate-docs": "typedoc --options typedoc/typedoc.json",
-    "release": "semantic-release"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.3.14",
-    "@vitest/coverage-v8": "^3.1.2",
-    "conventional-changelog-conventionalcommits": "^9.3.1",
-    "cz-conventional-changelog": "^3.3.0",
-    "npm-run-all": "^4.1.5",
-    "semantic-release": "^25.0.3",
-    "tsdown": "^0.22.0",
-    "typescript": "^5.8.3",
-    "vitest": "^3.1.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Brenopms/ts-event-sourcing-snapshots.git"
-  },
-  "homepage": "https://github.com/Brenopms/ts-event-sourcing-snapshots",
-  "keywords": [
-    "event-sourcing",
-    "snapshots",
-    "typescript",
-    "ddd",
-    "cqrs"
-  ],
-  "dependencies": {
-    "@ts-event-sourcing/core": "^1.1.0"
-  },
-  "peerDependencies": {
-    "@ts-event-sourcing/core": "^1.1.0"
-  }
+	"name": "@ts-event-sourcing/snapshots",
+	"version": "0.0.1",
+	"description": "Snapshot extension for @ts-event-sourcing/core — accelerates aggregate rebuilds for long-lived streams",
+	"license": "MIT",
+	"author": "Breno Magalhães",
+	"type": "module",
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist/"
+	],
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.mts",
+				"default": "./dist/index.mjs"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		}
+	},
+	"sideEffects": false,
+	"scripts": {
+		"prepublishOnly": "npm run build",
+		"build": "tsdown",
+		"format": "biome format",
+		"format:fix": "biome format --write",
+		"lint": "biome check",
+		"lint:fix": "biome check --fix",
+		"test": "run-s build test:*",
+		"test:unit": "vitest run",
+		"test:coverage": "vitest run --coverage",
+		"watch:build": "tsc -p tsconfig.json -w",
+		"watch:test": "vitest",
+		"generate-docs": "typedoc --options typedoc/typedoc.json",
+		"release": "semantic-release"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.3.14",
+		"@vitest/coverage-v8": "^3.1.2",
+		"conventional-changelog-conventionalcommits": "^9.3.1",
+		"cz-conventional-changelog": "^3.3.0",
+		"npm-run-all": "^4.1.5",
+		"semantic-release": "^25.0.3",
+		"tsdown": "^0.22.0",
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/Brenopms/ts-event-sourcing-snapshots.git"
+	},
+	"homepage": "https://github.com/Brenopms/ts-event-sourcing-snapshots",
+	"keywords": [
+		"event-sourcing",
+		"snapshots",
+		"typescript",
+		"ddd",
+		"cqrs"
+	],
+	"dependencies": {
+		"@ts-event-sourcing/core": "^1.1.0"
+	},
+	"peerDependencies": {
+		"@ts-event-sourcing/core": "^1.1.0"
+	}
 }
